@@ -1,10 +1,23 @@
-FROM debian:bullseye
+FROM node:18
 
-RUN apt update && apt install -y python3 python3-pip python3-venv ffmpeg
+# Install yt-dlp and ffmpeg
+RUN apt update && \
+    apt install -y python3 python3-pip ffmpeg && \
+    pip3 install yt-dlp
 
-# Create venv and install yt-dlp
-RUN python3 -m venv /venv && \
-    /venv/bin/pip install yt-dlp
+# Set working directory
+WORKDIR /app
 
-# Add venv to PATH
-ENV PATH="/venv/bin:$PATH"
+# Copy files
+COPY package.json ./
+COPY index.js ./
+
+# Install dependencies
+RUN npm install
+
+# Expose port (very important for Render)
+ENV PORT=8080
+EXPOSE 8080
+
+# Start the app
+CMD ["npm", "start"]
